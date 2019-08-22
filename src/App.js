@@ -27,11 +27,9 @@ class App extends Component {
     this.state = {
       list
     }
-
-    this.onDismiss = this.onDismiss.bind(this)
   }
 
-  onDismiss(id) {
+  onDismiss = id => {
     // 該当idをlistから削除
     const updatedList = this.state.list.filter(item => item.objectID !== id)
     // stateの更新
