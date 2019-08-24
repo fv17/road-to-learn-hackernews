@@ -48,18 +48,20 @@ class App extends Component {
   render() {
     const { searchTerm, list } = this.state
     return (
-      <div className="App">
-        <Search
-          value={searchTerm}
-          onChange={this.onChangeSearchTerm}
-        >
-          Search
-        </Search>
-        <Table
-          list={list}
-          searchTerm={searchTerm}
-          onDismiss={this.onDismiss}
-        />
+      <div className="page">
+        <div className="interactions">
+          <Search
+            value={searchTerm}
+            onChange={this.onChangeSearchTerm}
+          >
+            Search
+          </Search>
+          <Table
+            list={list}
+            searchTerm={searchTerm}
+            onDismiss={this.onDismiss}
+          />
+        </div>
       </div>
     );
   }
@@ -76,26 +78,27 @@ const Search = ({ value, onChange, children }) =>
   </form>
 
 const Table = ({ list, searchTerm, onDismiss }) => 
-  <>
+  <div className="table">
     <h2>Welcome to the Road to learn React</h2>
     {list.filter(isSearched(searchTerm)).map(item => 
-    <div key={item.objectID}>
-      <span>
+    <div key={item.objectID} className="table-row">
+      <span style={largeColumn}>
         <a href={item.url}>{item.title}</a>
       </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
+      <span style={midColumn}>{item.author}</span>
+      <span style={smallColumn}>{item.num_comments}</span>
+      <span style={smallColumn}>{item.points}</span>
+      <span style={smallColumn}>
         <Button 
           onClick={() => onDismiss(item.objectID)}
+          className="button-inline"
         >
           dismiss  
         </Button>
       </span>
     </div>
     )}
-  </>
+  </div>
 
 const Button = ({ onClick, className = '', children }) =>
   <button
@@ -105,6 +108,18 @@ const Button = ({ onClick, className = '', children }) =>
   >
     {children}
   </button>
+
+const largeColumn = {
+  width: '40%'
+}
+
+const midColumn = {
+  width: '30%'
+}
+
+const smallColumn = {
+  width: '20%'
+}
 
 // const App= () => 
 // <div className="App">
