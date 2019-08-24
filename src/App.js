@@ -41,13 +41,22 @@ class App extends Component {
     }
   }
 
-  componentDidMount() {
-    const { searchTerm } = this.state
-
+  fetchSearchTopStories = searchTerm => {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error)
+  }
+
+  componentDidMount() {
+    const { searchTerm } = this.state
+    this.fetchSearchTopStories(searchTerm)
+  }
+
+  onSearchSubmit = event => {
+    const { searchTerm } = this.state
+    this.fetchSearchTopStories(searchTerm)
+    event.preventDefault() // HTMLデフォルトではsubmit時にページのリロードが走るため
   }
 
   setSearchTopStories = result => {
@@ -74,13 +83,13 @@ class App extends Component {
           <Search
             value={searchTerm}
             onChange={this.onChangeSearchTerm}
+            onSubmit={this.onSearchSubmit}
           >
             Search
           </Search>
           { result && 
             <Table
               list={result.hits}
-              searchTerm={searchTerm}
               onDismiss={this.onDismiss}
             />
           }
@@ -91,19 +100,20 @@ class App extends Component {
 }
 
 // ES6 arrow functions let you remove the block body, {}
-const Search = ({ value, onChange, children }) => 
-  <form>
-    {children} <input 
+const Search = ({ value, onChange, onSubmit ,children }) => 
+  <form onSubmit={onSubmit}>
+    <input 
       type="text"
       value={value}
       onChange={onChange}
     />
+    <button type="submit">{children}</button>
   </form>
 
-const Table = ({ list, searchTerm, onDismiss }) => 
+const Table = ({ list, onDismiss }) => 
   <div className="table">
     <h2>Welcome to the Road to learn React</h2>
-    {list.filter(isSearched(searchTerm)).map(item => 
+    {list.map(item => 
     <div key={item.objectID} className="table-row">
       <span style={largeColumn}>
         <a href={item.url}>{item.title}</a>
