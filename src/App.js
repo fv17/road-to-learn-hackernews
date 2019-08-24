@@ -49,13 +49,40 @@ class App extends Component {
     const { searchTerm, list } = this.state
     return (
       <div className="App">
-        <form>
-          <input 
-            type="text"
-            value={searchTerm}
-            onChange={this.onChangeSearchTerm}
-          />
-        </form>
+        <Search
+          value={searchTerm}
+          onChange={this.onChangeSearchTerm}
+        />
+        <Table
+          list={list}
+          searchTerm={searchTerm}
+          onDismiss={this.onDismiss}
+        />
+      </div>
+    );
+  }
+}
+
+class Search extends Component {
+  render() {
+    const { value, onChange } = this.props
+    return(
+      <form>
+        <input 
+          type="text"
+          value={value}
+          onChange={onChange}
+        />
+      </form>
+    )
+  }
+}
+
+class Table extends Component {
+  render() {
+    const { list, searchTerm, onDismiss } = this.props
+    return(
+      <>
         <h2>Welcome to the Road to learn React</h2>
         {list.filter(isSearched(searchTerm)).map(item => 
           <div key={item.objectID}>
@@ -67,7 +94,7 @@ class App extends Component {
             <span>{item.points}</span>
             <span>
               <button 
-                onClick={() => this.onDismiss(item.objectID)}
+                onClick={() => onDismiss(item.objectID)}
                 type="button"
               >
                 dismiss  
@@ -75,8 +102,8 @@ class App extends Component {
             </span>
           </div>
         )}
-      </div>
-    );
+      </>
+    )
   }
 }
 
