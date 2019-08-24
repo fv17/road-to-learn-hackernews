@@ -50,7 +50,11 @@ class App extends Component {
     return (
       <div className="App">
         <form>
-          <input type="text" onChange={this.onChangeSearchTerm} />
+          <input 
+            type="text"
+            value={searchTerm}
+            onChange={this.onChangeSearchTerm}
+          />
         </form>
         <h2>Welcome to the Road to learn React</h2>
         {list.filter(isSearched(searchTerm)).map(item => 
