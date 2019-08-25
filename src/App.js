@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
-const DEFAULT_HPP = '100';
+const DEFAULT_HPP = '20';
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
@@ -39,7 +39,8 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      result: null,
+      results: null,
+      searchKey: '',
       searchTerm: DEFAULT_QUERY,
     }
   }
@@ -53,20 +54,29 @@ class App extends Component {
 
   componentDidMount() {
     const { searchTerm } = this.state
+    this.setState({ searchKey: searchTerm })
     this.fetchSearchTopStories(searchTerm)
+  }
+
+  needsToSearchTopStories = searchTerm => {
+    return !this.state.results[searchTerm];
   }
 
   onSearchSubmit = event => {
     const { searchTerm } = this.state
-    this.fetchSearchTopStories(searchTerm)
+    this.setState({ searchKey: searchTerm })
+    if (this.needsToSearchTopStories(searchTerm)) {
+      this.fetchSearchTopStories(searchTerm);
+    }
     event.preventDefault() // HTMLデフォルトではsubmit時にページのリロードが走るため
   }
 
   setSearchTopStories = result => {
     const { hits, page } = result
+    const { searchKey, results } = this.state
 
-    const oldHits = page !== 0
-      ? this.state.result.hits
+    const oldHits = results && results[searchKey]
+      ? results[searchKey].hits
       : [];
 
     const updatedHits = [
@@ -75,15 +85,26 @@ class App extends Component {
     ];
 
     this.setState({
-      result: { hits: updatedHits, page }
+      results: {
+        ...results,
+        [searchKey]: { hits: updatedHits, page }
+      }
     });
   }
 
   onDismiss = id => {
-    const updatedHits = this.state.result.hits.filter(item => item.objectID !== id)
-    // const updatedResult = Object.assign({}, this.state.result, { hits: updatedHits })
-    const updatedResult = { ...this.state.result, hits: updatedHits }
-    this.setState({ result: updatedResult })
+    const { searchKey, results } = this.state;
+    const { hits, page } = results[searchKey];
+    
+    const isNotId = item => item.objectID !== id;
+    const updatedHits = hits.filter(isNotId);
+    
+    this.setState({
+      results: {
+        ...results,
+        [searchKey]: { hits: updatedHits, page }
+      }
+    });
   }
 
   onChangeSearchTerm = event => {
@@ -91,8 +112,23 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, result } = this.state
-    const page = (result && result.page) || 0
+    const {
+      searchTerm,
+      results,
+      searchKey
+    } = this.state;
+
+    const page = (
+      results &&
+      results[searchKey] &&
+      results[searchKey].page
+    ) || 0;
+      
+    const list = (
+      results &&
+      results[searchKey] &&
+      results[searchKey].hits
+    ) || [];
 
     return (
       <div className="page">
@@ -104,17 +140,15 @@ class App extends Component {
           >
             Search
           </Search>
-          { result && 
-            <Table
-              list={result.hits}
-              onDismiss={this.onDismiss}
-            />
-          }
-          <div className="interactions">
-            <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
-              More
-            </Button>
-          </div>
+        </div>
+        <Table
+          list={list}
+          onDismiss={this.onDismiss}
+        />
+        <div className="interactions">
+          <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
+            More
+          </Button>
         </div>
       </div>
     );
